@@ -1,0 +1,373 @@
+#!/bin/bash
+# FILE: DEPLOYMENT_READY.txt
+# STATUS: ✅ BLUEPRINT COMPLETE & LOCKED
+# DATE: 2025-12-16
+# NEXT: Copy CODEX_REVIEW_PROMPT.md → Send to Codex → Implement
+
+================================================================================
+ CROSS-CONTAMINATION PREVENTION: COMPLETE BLUEPRINT PACKAGE
+================================================================================
+
+MISSION: Clean separation of Researcher and Translator realms
+         No cross-contamination between research data and translations
+         Locked architecture ready for implementation
+
+STATUS: ✅ COMPLETE
+
+================================================================================
+ DELIVERABLES (13 FILES)
+================================================================================
+
+DOCUMENTATION (9 FILES):
+├─ 📘 START_HERE.md ........................ Quick start guide (5 min read)
+├─ 📕 REALM_BLUEPRINT.md ................... Full architecture design
+├─ 📗 ARCHITECTURE_DIAGRAMS.md ............. Visual reference (10 diagrams)
+├─ 🤖 CODEX_REVIEW_PROMPT.md ............... Copy to Codex AI
+├─ 💻 IMPLEMENTATION_EXAMPLES.md ........... Code patterns (Python + JSX + SQL)
+├─ ⚙️  ENV_SETUP_GUIDE.md .................. Configuration reference
+├─ ✅ IMPLEMENTATION_CHECKLIST.md ......... 10 phases × 100+ items
+├─ 📊 IMPLEMENTATION_ROADMAP.md ............ High-level overview
+├─ 📋 BLUEPRINT_INDEX.md .................. Master navigation
+└─ 📦 PACKAGE_MANIFEST.md ................. This package summary
+
+DATABASE (1 FILE):
+└─ 🗄️  migrations/001_realm_tables.sql .... Schema migration (7 tables)
+
+CONFIGURATION (2 FILES):
+├─ 🎯 mauri/realms/researcher/manifest.json .. Config template
+└─ 🎯 mauri/realms/translator/manifest.json .. Config template
+
+TOTAL: 13 files, 3,500+ lines
+
+================================================================================
+ WHAT YOU GET
+================================================================================
+
+1. ARCHITECTURE ✓
+   • Per-realm OpenAI Assistant + Vector Store IDs
+   • Realm-scoped Supabase tables (7 tables, all with realm_id)
+   • Dual-vector strategy (OpenAI + Supabase)
+   • Unified recall gateway: POST /{realm_id}/recall
+   • Chat pipeline integration
+   • Multi-realm deployment support
+
+2. IMPLEMENTATION ✓
+   • Code patterns (RealmConfigLoader, RecallService, FastAPI endpoint)
+   • Database migration (SQL ready to run)
+   • Configuration templates (fill in your IDs)
+   • Environment variables guide (all 8+ variables documented)
+   • Integration examples (Python, JSX, SQL)
+
+3. PROCESS ✓
+   • Codex review prompt (ready to send)
+   • 10-phase implementation checklist (100+ items)
+   • Testing procedures (local + Render)
+   • Deployment guide (environment setup)
+   • Troubleshooting guide (50+ issues)
+
+4. DOCUMENTATION ✓
+   • Architecture overview (8 sections)
+   • Visual diagrams (10+ ASCII diagrams)
+   • Data flows (researcher + translator)
+   • Configuration structure (realm manifests)
+   • Success criteria (10 checkpoints)
+   • Navigation index (find what you need)
+
+================================================================================
+ QUICK START (5 MINUTES)
+================================================================================
+
+1. Open: START_HERE.md
+2. Read: Sections 1-2
+3. Copy: CODEX_REVIEW_PROMPT.md (entire prompt)
+4. Send: To Codex AI
+5. Result: Codex returns file list + exact diffs
+
+Then: Follow IMPLEMENTATION_CHECKLIST.md (10 phases)
+
+================================================================================
+ IMPLEMENTATION TIMELINE
+================================================================================
+
+Phase 1: Preparation          → 15 minutes  (read docs)
+Phase 2: Codex Review          → 20 minutes  (Codex scans repo)
+Phase 3: Backend Changes       → 45 minutes  (apply diffs)
+Phase 4: Database & Config     → 15 minutes  (migrations + manifests)
+Phase 5: Local Testing         → 30 minutes  (verify it works)
+Phase 6: Render Deployment     → 20 minutes  (push to production)
+Phase 7: Validation            → 15 minutes  (acceptance tests)
+────────────────────────────────────────────────
+TOTAL:                         2.5 hours
+
+================================================================================
+ WHAT GETS FIXED
+================================================================================
+
+BEFORE (Cross-Contaminated):
+  Research queries return translation data
+  Translation queries return research data
+  Shared OpenAI vector store for all realms
+  Shared Supabase tables (no realm isolation)
+  Scattered recall logic (/vector/search, /kitenga, etc.)
+  ❌ BROKEN
+
+AFTER (Realm-Isolated):
+  Research queries return ONLY research data
+  Translation queries return ONLY translation data
+  Isolated OpenAI assistants per realm
+  Isolated Supabase tables per realm
+  Centralized recall gateway (/{realm_id}/recall)
+  ✅ FIXED
+
+================================================================================
+ ARCHITECTURE AT A GLANCE
+================================================================================
+
+                        Frontend (React)
+                    /research/recall         /translator/recall
+                         │                        │
+                         └────────┬───────────────┘
+                                  │
+                         Proxy (FastAPI) 8100
+                                  │
+                         Backend (Python) 8000
+                                  │
+                    ┌─────────────┼─────────────┐
+                    ▼             ▼             ▼
+            OpenAI (scoped)    Supabase (scoped)  Redis (optional)
+            
+Researcher realm:              Translator realm:
+• asst_researcher_x            • asst_translator_y
+• vs_researcher_x              • vs_translator_y
+• research_sessions            • translations
+• research_notes               • translation_logs
+• research_chunks              • pronunciation_cache
+
+All with realm_id isolation ✓
+
+================================================================================
+ BEFORE YOU START: GATHER THESE
+================================================================================
+
+☐ OpenAI API Key (sk-proj-xxxx)
+☐ Researcher Assistant ID (asst_researcher_xxxxx)
+☐ Researcher Vector Store ID (vs_researcher_xxxxx)
+☐ Translator Assistant ID (asst_translator_yyyyy)
+☐ Translator Vector Store ID (vs_translator_yyyyy)
+☐ Supabase Project URL (https://xxxx.supabase.co)
+☐ Supabase Anon Key (eyJxxxx)
+☐ Backend repo access
+☐ Render admin access
+
+No OpenAI IDs yet? Create them:
+  1. Go to https://platform.openai.com/assistants
+  2. Create Assistant (pick model, add instructions)
+  3. Add File Search (Vector Store)
+  4. Copy Assistant ID and Vector Store ID
+  5. Fill into mauri/realms/{researcher,translator}/manifest.json
+
+================================================================================
+ KEY FILES & THEIR PURPOSE
+================================================================================
+
+START_HERE.md
+  └─ Quick summary + 5-min overview. Read first.
+
+REALM_BLUEPRINT.md
+  └─ Full architecture + all design decisions. Reference.
+
+ARCHITECTURE_DIAGRAMS.md
+  └─ Visual diagrams (current → target → data flows). Quick ref.
+
+CODEX_REVIEW_PROMPT.md
+  └─ Copy-paste to Codex. Get code mapping + diffs.
+
+IMPLEMENTATION_EXAMPLES.md
+  └─ Code patterns. Use as reference while coding.
+
+ENV_SETUP_GUIDE.md
+  └─ Environment variables. Template for local + Render.
+
+IMPLEMENTATION_CHECKLIST.md
+  └─ Step-by-step guide. Check off as you go.
+
+IMPLEMENTATION_ROADMAP.md
+  └─ High-level overview. For project leads.
+
+BLUEPRINT_INDEX.md
+  └─ Master navigation. Find anything quickly.
+
+migrations/001_realm_tables.sql
+  └─ Database schema. Run on Supabase.
+
+mauri/realms/{researcher,translator}/manifest.json
+  └─ Config templates. Fill in IDs.
+
+================================================================================
+ HOW CODEX HELPS
+================================================================================
+
+You send: CODEX_REVIEW_PROMPT.md (entire prompt)
+
+Codex scans the repo and returns:
+  ✓ List of all existing routes
+  ✓ Where vector search is currently implemented
+  ✓ How Supabase is queried
+  ✓ Files to change (numbered list)
+  ✓ Exact code diffs for each file
+  ✓ Updated .env.example
+  ✓ Ensure no unrelated files are touched
+
+You get: Copy-paste ready diffs
+
+================================================================================
+ SUCCESS CRITERIA
+================================================================================
+
+When complete, you'll have:
+
+✅ Researcher realm isolated
+   • Own OpenAI Assistant
+   • Own Vector Store
+   • Own Supabase tables (research_sessions, research_notes, etc.)
+   
+✅ Translator realm isolated
+   • Own OpenAI Assistant
+   • Own Vector Store
+   • Own Supabase tables (translations, translation_logs, pronunciation_cache)
+
+✅ No cross-contamination
+   • Research queries return research data only
+   • Translation queries return translation data only
+   • All queries filter by realm_id
+
+✅ Recall gateway working
+   • POST /researcher/recall returns research results
+   • POST /translator/recall returns 403 (disabled)
+
+✅ Chat pipeline integrated
+   • Frontend uses /{realm_id}/recall
+   • Results saved to realm-scoped tables
+
+✅ Render deployment ready
+   • All env vars set
+   • Code deployed
+   • Health check passes
+
+✅ 100% tested
+   • All acceptance tests pass
+   • No data leaks
+
+================================================================================
+ SUPPORT & TROUBLESHOOTING
+================================================================================
+
+Confused about design?
+  → Read REALM_BLUEPRINT.md (sections 1-4)
+
+Need visuals?
+  → Read ARCHITECTURE_DIAGRAMS.md
+
+Don't know what to do?
+  → Read IMPLEMENTATION_CHECKLIST.md
+
+Need code help?
+  → Read IMPLEMENTATION_EXAMPLES.md
+
+Environment errors?
+  → Read ENV_SETUP_GUIDE.md
+
+Stuck on testing?
+  → Read IMPLEMENTATION_CHECKLIST.md (Phase 10: Troubleshooting)
+
+Need navigation?
+  → Read BLUEPRINT_INDEX.md or START_HERE.md
+
+================================================================================
+ THE ROAD TO DONE
+================================================================================
+
+     START
+       │
+       ▼
+    Read docs (15 min)
+    [START_HERE.md]
+       │
+       ▼
+    Send to Codex (5 min)
+    [CODEX_REVIEW_PROMPT.md]
+       │
+       ▼
+    Codex returns diffs (auto)
+       │
+       ▼
+    Apply changes (45 min)
+    [IMPLEMENTATION_EXAMPLES.md]
+    [IMPLEMENTATION_CHECKLIST.md Phase 3]
+       │
+       ▼
+    Run migration + config (15 min)
+    [ENV_SETUP_GUIDE.md]
+    [migrations/001_realm_tables.sql]
+       │
+       ▼
+    Test locally (30 min)
+    [IMPLEMENTATION_CHECKLIST.md Phase 6]
+       │
+       ▼
+    Deploy to Render (20 min)
+    [ENV_SETUP_GUIDE.md]
+    [IMPLEMENTATION_CHECKLIST.md Phase 5]
+       │
+       ▼
+    Validate (15 min)
+    [IMPLEMENTATION_CHECKLIST.md Phase 7]
+       │
+       ▼
+    ✅ DONE (2.5 hours total)
+
+================================================================================
+ NEXT 5 MINUTES
+================================================================================
+
+1. Open: START_HERE.md
+2. Read: First 2 sections
+3. Copy: All of CODEX_REVIEW_PROMPT.md
+4. Send: To Codex AI with task description
+5. Wait: ~20 minutes for Codex to analyze
+6. Continue: With IMPLEMENTATION_CHECKLIST.md
+
+That's it. Everything else is here.
+
+================================================================================
+ STATUS & SIGN-OFF
+================================================================================
+
+✅ Architecture locked
+✅ Documentation complete (3,500+ lines)
+✅ Code examples provided
+✅ Database schema ready
+✅ Configuration templated
+✅ Environment guide complete
+✅ Codex prompt ready
+✅ Implementation checklist ready
+✅ Testing procedures ready
+✅ Deployment guide ready
+
+READY FOR: Implementation
+
+BLUEPRINT STATUS: 🔒 LOCKED & FINAL
+
+================================================================================
+ LET'S GO
+================================================================================
+
+👉 Next step: Open START_HERE.md
+
+You have everything you need. No surprises. No unknowns.
+
+Estimated time to done: 2.5 hours
+
+Good luck! 🚀
+
+================================================================================
