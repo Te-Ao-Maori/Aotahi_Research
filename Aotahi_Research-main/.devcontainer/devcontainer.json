@@ -1,0 +1,52 @@
+{
+  "name": "Māori Research Portal",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  },
+  "forwardPorts": [8000, 8100, 5000, 6379],
+  "portsAttributes": {
+    "8000": {
+      "label": "Backend (Te Pó)",
+      "onAutoForward": "silent"
+    },
+    "8100": {
+      "label": "Proxy (te_po_proxy)",
+      "onAutoForward": "notify"
+    },
+    "5000": {
+      "label": "Frontend (Vite)",
+      "onAutoForward": "notify"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post_create.sh"
+}
