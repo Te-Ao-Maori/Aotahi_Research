@@ -12,8 +12,8 @@ Use this checklist to track progress as you implement the blueprint.
 - [x] Review CODEX_REVIEW_PROMPT.md
 - [x] Review ENV_SETUP_GUIDE.md
 - [ ] Gather OpenAI Assistant IDs:
-  - [ ] Researcher realm assistant_id
-  - [ ] Researcher realm vector_store_id
+  - [x] Researcher realm assistant_id
+  - [x] Researcher realm vector_store_id
   - [ ] Translator realm assistant_id
   - [ ] Translator realm vector_store_id
 - [ ] Verify Supabase admin access
@@ -23,61 +23,61 @@ Use this checklist to track progress as you implement the blueprint.
 
 ## Phase 2: Codex Review 🤖
 
-- [ ] Copy CODEX_REVIEW_PROMPT.md entirely
-- [ ] Send to Codex with task: "Review and scan this codebase"
-- [ ] Codex returns:
-  - [ ] List of existing routes (kitenga, reo, vector, research, documents)
-  - [ ] Current vector search implementation location
-  - [ ] Database query pattern (how Supabase is currently used)
-  - [ ] Files to change (numbered list)
-  - [ ] Exact code diffs for each file
-  - [ ] Updated .env.example
-- [ ] Review Codex output:
-  - [ ] Verify file paths are correct (check repo)
-  - [ ] Verify diffs make sense (test mentally)
-  - [ ] Ask clarifying questions if needed
-  - [ ] Request adjustments if necessary
+- [x] Copy CODEX_REVIEW_PROMPT.md entirely
+- [x] Send to Codex with task: "Review and scan this codebase"
+- [x] Codex returns:
+  - [x] List of existing routes (kitenga, reo, vector, research, documents)
+  - [x] Current vector search implementation location
+  - [x] Database query pattern (how Supabase is currently used)
+  - [x] Files to change (numbered list)
+  - [x] Exact code diffs for each file
+  - [x] Updated .env.example
+- [x] Review Codex output:
+  - [x] Verify file paths are correct (check repo)
+  - [x] Verify diffs make sense (test mentally)
+  - [x] Ask clarifying questions if needed
+  - [x] Request adjustments if necessary
 
 ---
 
 ## Phase 3: Backend Implementation 🔨
 
 ### Part A: Create/Modify Files
-- [ ] Create `schema/realms.py` (RealmConfigLoader)
-  - [ ] Test: Load researcher manifest
-  - [ ] Test: Load translator manifest
-  - [ ] Test: Cache is working
-  - [ ] Test: Error handling for missing files
-- [ ] Create `utils/recall_service.py` (RecallService)
-  - [ ] Test: Embed query via OpenAI
-  - [ ] Test: Search OpenAI vector store (if available)
-  - [ ] Test: Search Supabase pgvector (if available)
-  - [ ] Test: Merge + deduplicate results
-  - [ ] Test: Logging to Supabase
-- [ ] Create `routes/recall.py` (recall endpoint)
-  - [ ] Test: POST /researcher/recall (200)
-  - [ ] Test: POST /translator/recall (200)
-  - [ ] Test: Invalid realm_id (404)
-  - [ ] Test: Realm with recall disabled (403)
-  - [ ] Test: Response schema matches spec
-- [ ] Modify `main.py`:
-  - [ ] Import recall router
-  - [ ] Register recall router: `app.include_router(recall.router)`
-  - [ ] Test: Backend starts without errors
+- [x] Create `schema/realms.py` (RealmConfigLoader)
+  - [x] Test: Load researcher manifest
+  - [x] Test: Load translator manifest
+  - [x] Test: Cache is working
+  - [x] Test: Error handling for missing files
+- [x] Create `utils/recall_service.py` (RecallService)
+  - [x] Test: Embed query via OpenAI
+  - [x] Test: Search OpenAI vector store (if available)
+  - [x] Test: Search Supabase pgvector (if available)
+  - [x] Test: Merge + deduplicate results
+  - [x] Test: Logging to Supabase
+- [x] Create `routes/recall.py` (recall endpoint)
+  - [x] Test: POST /researcher/recall (200)
+  - [x] Test: POST /translator/recall (200)
+  - [x] Test: Invalid realm_id (404)
+  - [x] Test: Realm with recall disabled (403)
+  - [x] Test: Response schema matches spec
+- [x] Modify `main.py`:
+  - [x] Import recall router
+  - [x] Register recall router: `app.include_router(recall.router)`
+  - [x] Test: Backend starts without errors
 
 ### Part B: Environment Variables
-- [ ] Update `.env.example`:
-  - [ ] Add REALM_ID
-  - [ ] Add REALM_CONFIG_PATH
-  - [ ] Add OPENAI_ASSISTANT_ID_RESEARCHER
-  - [ ] Add OPENAI_VECTOR_STORE_ID_RESEARCHER
-  - [ ] Add OPENAI_ASSISTANT_ID_TRANSLATOR
-  - [ ] Add OPENAI_VECTOR_STORE_ID_TRANSLATOR
-- [ ] Create local `.env`:
-  - [ ] Copy from .env.example
-  - [ ] Fill in actual OpenAI IDs
-  - [ ] Fill in Supabase URL + key
-  - [ ] Test: `echo $OPENAI_ASSISTANT_ID_RESEARCHER` returns correct ID
+- [x] Update `.env.example`:
+  - [x] Add REALM_ID
+  - [x] Add REALM_CONFIG_PATH
+  - [x] Add OPENAI_ASSISTANT_ID_RESEARCHER
+  - [x] Add OPENAI_VECTOR_STORE_ID_RESEARCHER
+  - [x] Add OPENAI_ASSISTANT_ID_TRANSLATOR
+  - [x] Add OPENAI_VECTOR_STORE_ID_TRANSLATOR
+- [x] Create local `.env`:
+  - [x] Copy from .env.example
+  - [x] Fill in actual OpenAI IDs
+  - [x] Fill in Supabase URL + key
+  - [x] Test: `echo $OPENAI_ASSISTANT_ID_RESEARCHER` returns correct ID
 
 ---
 

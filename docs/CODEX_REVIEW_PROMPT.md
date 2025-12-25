@@ -58,7 +58,7 @@ From project files, these are active:
 
 ## Tight Blueprint (Reference)
 
-See `REALM_BLUEPRINT.md` in the repo root for full details. Key points:
+See `docs/REALM_BLUEPRINT.md` for full details. Key points:
 
 ### 1. Realm Configuration
 Store per-realm config at `mauri/realms/{realm_id}/manifest.json`:

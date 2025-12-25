@@ -1,0 +1,7 @@
+[
+  {
+    "file": "te_po_proxy/main.py",
+    "method": "GET",
+    "path": "/health"
+  }
+]

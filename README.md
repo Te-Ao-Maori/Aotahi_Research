@@ -19,8 +19,12 @@ cd te_ao && npm install && cd ..
 
 # Update environment
 cp .env.example .env
-# Edit .env and set TE_PO_URL and BEARER_KEY
+# Edit .env and set TE_PO_URL, BEARER_KEY, VITE_API_URL, VITE_PIPELINE_TOKEN, and VITE_OPENAI_KEY
 ```
+
+## Documentation
+
+Detailed design, setup, and implementation notes live under `docs/`. Start with `docs/START_HERE.md` for the curated reading order.
 
 ## Running
 

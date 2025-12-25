@@ -5,18 +5,21 @@
   "te_po_url": "http://localhost:5000",
   "auth_mode": "bearer",
   "openai": {
-    "assistant_id": "asst_translator_yyyyy_REPLACE_ME",
-    "vector_store_id": "vs_translator_yyyyy_REPLACE_ME",
+    "assistant_id": "asst_translator_placeholder",
+    "vector_store_id": "vs_translator_placeholder",
     "model": "gpt-4",
     "instructions": "You are an expert Te Reo Māori translator. Provide accurate, culturally-appropriate translations and pronunciation guidance. Include dialect information when relevant."
   },
   "supabase": {
     "project_url": "https://xxxx.supabase.co",
-    "anon_key": "eyJ...REPLACE_ME"
+    "anon_key": "eyJ...REPLACE_ME",
+    "tables": {
+      "recall_logs": "recall_logs"
+    }
   },
   "features": {
-    "vector_search": false,
-    "pipeline": false,
+    "vector_search": true,
+    "pipeline": true,
     "recall": false,
     "memory": false,
     "kaitiaki": false
@@ -29,5 +32,10 @@
     "confidence_threshold": 0.75
   },
   "created_at": "2025-12-16T00:00:00Z",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "recall_config": {
+    "vector_store": "both",
+    "top_k": 5,
+    "use_supabase_pgvector": true
+  }
 }

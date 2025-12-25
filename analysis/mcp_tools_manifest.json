@@ -1,0 +1,880 @@
+{
+  "cloudflare": [
+    {
+      "name": "deploy_pages",
+      "description": "Deploy a local build directory to a Cloudflare Pages project via Wrangler CLI.",
+      "method": "POST",
+      "path": "wrangler pages deploy",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dist_path": {
+            "type": "string",
+            "description": "Local build output directory"
+          },
+          "project": {
+            "type": "string",
+            "description": "Pages project name"
+          },
+          "branch": {
+            "type": "string",
+            "default": "main",
+            "description": "Branch label"
+          },
+          "commit_message": {
+            "type": "string",
+            "description": "Optional commit message for Wrangler"
+          }
+        },
+        "required": [
+          "dist_path",
+          "project"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "deploy_pages"
+    },
+    {
+      "name": "deploy_te_ao",
+      "description": "Run npm build for Te Ao and deploy the dist folder to Cloudflare Pages.",
+      "method": "POST",
+      "path": "wrangler pages deploy + npm run build",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project_path": {
+            "type": "string",
+            "description": "Path to the repository root"
+          },
+          "project_name": {
+            "type": "string",
+            "description": "Cloudflare Pages project name"
+          },
+          "branch": {
+            "type": "string",
+            "default": "main"
+          }
+        },
+        "required": [
+          "project_path",
+          "project_name"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "deploy_te_ao"
+    },
+    {
+      "name": "create_project",
+      "description": "Create a new Cloudflare Pages project via the Pages API.",
+      "method": "POST",
+      "path": "/accounts/{account_id}/pages/projects",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "production_branch": {
+            "type": "string",
+            "default": "main"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "create_project"
+    },
+    {
+      "name": "list_projects",
+      "description": "List Cloudflare Pages projects for the configured account.",
+      "method": "GET",
+      "path": "/accounts/{account_id}/pages/projects",
+      "inputSchema": {
+        "type": "object"
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "list_projects"
+    },
+    {
+      "name": "get_project",
+      "description": "Return metadata for a specific Pages project.",
+      "method": "GET",
+      "path": "/accounts/{account_id}/pages/projects/{name}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "get_project"
+    },
+    {
+      "name": "set_env_vars",
+      "description": "Set environment variables for a Pages project (production and preview).",
+      "method": "PATCH",
+      "path": "/accounts/{account_id}/pages/projects/{project}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "env_vars": {
+            "type": "object",
+            "description": "Map of env vars"
+          },
+          "preview": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "project",
+          "env_vars"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "set_env_vars"
+    },
+    {
+      "name": "list_deployments",
+      "description": "List deployments for a Pages project.",
+      "method": "GET",
+      "path": "/accounts/{account_id}/pages/projects/{project}/deployments",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "list_deployments"
+    },
+    {
+      "name": "add_custom_domain",
+      "description": "Bind a custom domain to a Pages project.",
+      "method": "POST",
+      "path": "/accounts/{account_id}/pages/projects/{project}/domains",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "project",
+          "domain"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "add_custom_domain"
+    },
+    {
+      "name": "purge_cache",
+      "description": "Purge the cache for a Cloudflare zone.",
+      "method": "POST",
+      "path": "/zones/{zone_id}/purge_cache",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string"
+          },
+          "purge_everything": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "zone_id"
+        ]
+      },
+      "source": "cloudflare_tools.json",
+      "operationId": "purge_cache"
+    }
+  ],
+  "commands": [],
+  "openai": [
+    {
+      "name": "responses_generate",
+      "description": "Generate a response via the OpenAI Responses API.",
+      "method": "POST",
+      "path": "/responses",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model to execute",
+            "default": "gpt-5"
+          },
+          "input": {
+            "type": "string",
+            "description": "User input text"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Optional system instructions"
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "description": "Max tokens"
+          },
+          "temperature": {
+            "type": "number",
+            "description": "Sampling temperature"
+          },
+          "background": {
+            "type": "boolean",
+            "default": false,
+            "description": "Run background job"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Optional metadata"
+          }
+        },
+        "required": [
+          "input"
+        ]
+      },
+      "source": "openai_tools.json",
+      "operationId": "responses_generate"
+    },
+    {
+      "name": "responses_get",
+      "description": "Retrieve a previously generated response by ID.",
+      "method": "GET",
+      "path": "/responses/{response_id}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "response_id": {
+            "type": "string",
+            "description": "Response identifier"
+          }
+        },
+        "required": [
+          "response_id"
+        ]
+      },
+      "source": "openai_tools.json",
+      "operationId": "responses_get"
+    }
+  ],
+  "supabase": [
+    {
+      "name": "supabase_select",
+      "description": "Query rows from a Supabase table with filters.",
+      "method": "GET",
+      "path": "/{table}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {
+            "type": "string",
+            "description": "Table name"
+          },
+          "select": {
+            "type": "string",
+            "description": "Columns to select (comma-separated)"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit results"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset for pagination"
+          },
+          "order_by": {
+            "type": "string",
+            "description": "Order by column"
+          },
+          "order_direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          }
+        },
+        "required": [
+          "table"
+        ]
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_select"
+    },
+    {
+      "name": "supabase_insert",
+      "description": "Insert a new row into a table.",
+      "method": "POST",
+      "path": "/{table}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "description": "Row data"
+          },
+          "return": {
+            "type": "string",
+            "enum": [
+              "minimal",
+              "representation"
+            ],
+            "default": "representation"
+          }
+        },
+        "required": [
+          "table",
+          "data"
+        ]
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_insert"
+    },
+    {
+      "name": "supabase_update",
+      "description": "Update rows in a table matching filter conditions.",
+      "method": "PATCH",
+      "path": "/{table}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "description": "Update data"
+          },
+          "filters": {
+            "type": "object",
+            "description": "WHERE conditions"
+          }
+        },
+        "required": [
+          "table",
+          "data",
+          "filters"
+        ]
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_update"
+    },
+    {
+      "name": "supabase_delete",
+      "description": "Delete rows from a table.",
+      "method": "DELETE",
+      "path": "/{table}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {
+            "type": "string"
+          },
+          "filters": {
+            "type": "object",
+            "description": "WHERE conditions"
+          }
+        },
+        "required": [
+          "table",
+          "filters"
+        ]
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_delete"
+    },
+    {
+      "name": "supabase_rpc",
+      "description": "Call a stored procedure/function in Supabase.",
+      "method": "POST",
+      "path": "/rpc/{function_name}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "function_name": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object",
+            "description": "Function parameters"
+          }
+        },
+        "required": [
+          "function_name"
+        ]
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_rpc"
+    },
+    {
+      "name": "supabase_upload_file",
+      "description": "Upload a file to Supabase storage bucket.",
+      "method": "POST",
+      "path": "/storage/v1/buckets/{bucket_name}/upload",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "bucket_name": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "Path in bucket"
+          },
+          "file_content": {
+            "type": "string",
+            "description": "Base64 encoded file content"
+          }
+        },
+        "required": [
+          "bucket_name",
+          "file_path",
+          "file_content"
+        ]
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_upload_file"
+    },
+    {
+      "name": "supabase_list_buckets",
+      "description": "List all storage buckets.",
+      "method": "GET",
+      "path": "/storage/v1/buckets",
+      "inputSchema": {
+        "type": "object"
+      },
+      "source": "supabase_tools.json",
+      "operationId": "supabase_list_buckets"
+    }
+  ],
+  "tepo": [
+    {
+      "name": "tepo_kitenga_whisper",
+      "description": "Free-form text chat with optional retrieval, pipeline, and vector persistence. Main Kitenga conversation endpoint.",
+      "method": "POST",
+      "path": "/kitenga/gpt-whisper",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "description": "The text to process"
+              },
+              "session_id": {
+                "type": "string",
+                "description": "Chat session ID"
+              },
+              "system_prompt": {
+                "type": "string",
+                "description": "Custom system prompt"
+              },
+              "use_retrieval": {
+                "type": "boolean",
+                "description": "Use vector store retrieval"
+              },
+              "run_pipeline": {
+                "type": "boolean",
+                "description": "Run processing pipeline"
+              },
+              "save_vector": {
+                "type": "boolean",
+                "description": "Save to vector store"
+              }
+            },
+            "required": [
+              "prompt"
+            ]
+          }
+        },
+        "required": [
+          "payload"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_kitenga_whisper"
+    },
+    {
+      "name": "tepo_vector_search",
+      "description": "Semantic search across vector store. Find similar content by meaning.",
+      "method": "POST",
+      "path": "/vector/search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "top_k": {
+            "type": "integer",
+            "default": 5,
+            "description": "Number of results"
+          },
+          "threshold": {
+            "type": "number",
+            "default": 0.7,
+            "description": "Similarity threshold"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_vector_search"
+    },
+    {
+      "name": "tepo_ocr_scan",
+      "description": "Extract text from images, PDFs, or documents using OCR.",
+      "method": "POST",
+      "path": "/ocr/scan",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "description": "URL to file or base64 encoded image"
+          },
+          "taonga_mode": {
+            "type": "boolean",
+            "description": "Enable taonga (treasure) preservation mode"
+          },
+          "prefer_offline": {
+            "type": "boolean",
+            "description": "Use offline OCR if available"
+          }
+        },
+        "required": [
+          "file_url"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_ocr_scan"
+    },
+    {
+      "name": "tepo_pipeline_run",
+      "description": "Execute a data processing pipeline. Pipelines: ocr, summarise, translate, embed, taonga.",
+      "method": "POST",
+      "path": "/awa/pipeline",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "ocr",
+              "summarise",
+              "translate",
+              "embed",
+              "taonga"
+            ],
+            "description": "Pipeline name"
+          },
+          "input": {
+            "type": "object",
+            "description": "Input data for pipeline"
+          },
+          "wait": {
+            "type": "boolean",
+            "default": false,
+            "description": "Wait for completion"
+          },
+          "realm": {
+            "type": "string",
+            "description": "Target realm"
+          }
+        },
+        "required": [
+          "name",
+          "input"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_pipeline_run"
+    },
+    {
+      "name": "tepo_reo_translate",
+      "description": "Translate text to/from Māori. Uses context for accuracy.",
+      "method": "POST",
+      "path": "/reo/translate",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to translate"
+          },
+          "target_language": {
+            "type": "string",
+            "default": "mi",
+            "description": "Target language code"
+          },
+          "context": {
+            "type": "string",
+            "description": "Context for translation"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_reo_translate"
+    },
+    {
+      "name": "tepo_memory_store",
+      "description": "Store content in vector memory with embedding. Maintains persistent context.",
+      "method": "POST",
+      "path": "/awa/memory/store",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Content to store"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadata (tags, source, etc)"
+          },
+          "realm": {
+            "type": "string",
+            "description": "Realm name"
+          },
+          "tapu_level": {
+            "type": "integer",
+            "default": 0,
+            "description": "Tapu (restricted) level"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_memory_store"
+    },
+    {
+      "name": "tepo_memory_query",
+      "description": "Semantic search in memory. Retrieve stored context.",
+      "method": "POST",
+      "path": "/awa/memory/query",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "top_k": {
+            "type": "integer",
+            "default": 5,
+            "description": "Results to return"
+          },
+          "threshold": {
+            "type": "number",
+            "default": 0.7,
+            "description": "Confidence threshold"
+          },
+          "realm": {
+            "type": "string",
+            "description": "Realm to search in"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_memory_query"
+    },
+    {
+      "name": "tepo_kaitiaki_register",
+      "description": "Register a new kaitiaki (guardian/agent) with role, system prompt, and tools.",
+      "method": "POST",
+      "path": "/awa/kaitiaki/register",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Kaitiaki name"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role/responsibility"
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "System prompt for kaitiaki"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Available tools"
+          },
+          "realm": {
+            "type": "string",
+            "description": "Realm assignment"
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "system_prompt"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_kaitiaki_register"
+    },
+    {
+      "name": "tepo_task_execute",
+      "description": "Execute a task via a specific kaitiaki. Routes to appropriate guardian.",
+      "method": "POST",
+      "path": "/awa/task",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kaitiaki": {
+            "type": "string",
+            "description": "Kaitiaki name"
+          },
+          "task": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "input": {
+            "type": "object",
+            "description": "Task input data"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "normal",
+              "high"
+            ],
+            "default": "normal"
+          },
+          "realm": {
+            "type": "string",
+            "description": "Realm context"
+          }
+        },
+        "required": [
+          "kaitiaki",
+          "task",
+          "input"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_task_execute"
+    },
+    {
+      "name": "tepo_db_chat_history",
+      "description": "Retrieve chat history for a session.",
+      "method": "GET",
+      "path": "/kitenga/db/chat/history/{session_id}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "Chat session ID"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "description": "Number of messages"
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_db_chat_history"
+    },
+    {
+      "name": "tepo_db_taonga_search",
+      "description": "Search for taonga (treasured content) in database.",
+      "method": "POST",
+      "path": "/kitenga/db/taonga/search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Results limit"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_db_taonga_search"
+    },
+    {
+      "name": "tepo_health_check",
+      "description": "Check Te Pō backend health and status.",
+      "method": "GET",
+      "path": "/heartbeat",
+      "inputSchema": {
+        "type": "object"
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_health_check"
+    },
+    {
+      "name": "tepo_list_kaitiaki",
+      "description": "List all registered kaitiaki in the system.",
+      "method": "GET",
+      "path": "/awa/kaitiaki",
+      "inputSchema": {
+        "type": "object"
+      },
+      "source": "tepo_tools.json",
+      "operationId": "tepo_list_kaitiaki"
+    }
+  ]
+}

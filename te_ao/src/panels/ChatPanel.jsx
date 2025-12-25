@@ -4,6 +4,73 @@ import { v4 as uuidv4 } from "uuid";
 import KitengaShell from "../layouts/KitengaShell";
 import ChatMessage from "../components/chat/ChatMessage";
 import ToolResultCard from "../components/chat/ToolResultCard";
+import { useOpenAiTool } from "../hooks/useOpenAiTool.js";
+
+const TOOL_LIBRARY = [
+  {
+    key: "summarize",
+    label: "Summarize / PDF upload",
+    description: "Compress the current prompt or an attached PDF into a concise summary.",
+    hint: "text • file",
+  },
+  {
+    key: "translate",
+    label: "Translate",
+    description: "Translate between Te Reo Māori and English with cultural awareness.",
+    hint: "text",
+  },
+  {
+    key: "explain",
+    label: "Explain",
+    description: "Ask Kitenga to clarify or expand on the prompt with context.",
+    hint: "text",
+  },
+  {
+    key: "pronounce",
+    label: "Pronounce",
+    description: "Return pronunciation guidance and phonetic hints.",
+    hint: "text",
+  },
+  {
+    key: "ocr",
+    label: "OCR / Document",
+    description: "Send an image or PDF and extract text with the OCR pipeline.",
+    hint: "file",
+    requiresFile: true,
+  },
+  {
+    key: "research",
+    label: "Research stack",
+    description: "Run the stacked research pipeline (vectors, docs, web) for deep exploration.",
+    hint: "text",
+  },
+  {
+    key: "web_search",
+    label: "Web search",
+    description: "Query Brave web search for fresh references.",
+    hint: "text",
+  },
+  {
+    key: "sync",
+    label: "Sync / Supabase",
+    description: "Read the latest Supabase entries so the kaitiaki can reference stored memory.",
+    hint: "noprompt",
+  },
+  {
+    key: "recall",
+    label: "Recall",
+    description: "Pull vector matches of past chats/tool results to reintroduce context.",
+    hint: "vector",
+  },
+  {
+    key: "save_chat",
+    label: "Save chat",
+    description: "Commit the current transcript into memory storage for future recall.",
+    hint: "text",
+  },
+];
+
+const FAST_TOOL_KINDS = new Set(["explain", "pronounce", "web_search"]);
 
 const Spinner = () => (
   <div className="flex items-center gap-2 text-sm text-primary">
@@ -16,6 +83,7 @@ export default function ChatPanel({ className = "" }) {
   const SUMMARY_WORDS = 600;
   const { request, baseUrl } = useApi();
   const callApi = useMemo(() => request, [request]); // helper alias
+  const { runAsyncTool, hasFastLane } = useOpenAiTool();
 
   const [prompt, setPrompt] = useState("");
   const [lastReply, setLastReply] = useState(null);
@@ -32,9 +100,24 @@ export default function ChatPanel({ className = "" }) {
   const useKaitiakiTone = true; // always on
   const useReasoning = true; // always on
   const sessionId = "ui-chat";
+  const realmId = import.meta.env.VITE_REALM_ID || "maori_research";
+  const recallPath = `/${realmId}/recall`;
   const [responses, setResponses] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [recallMatches, setRecallMatches] = useState([]);
   const useRetrieval = Boolean(status?.openai_ok && status?.vector_status);
+
+  const pushReply = (reply, entryKind = "chat") => {
+    const entry = {
+      id: uuidv4(),
+      prompt: prompt || fileName || "[file]",
+      reply,
+      kind: entryKind,
+      ts: new Date().toISOString(),
+    };
+    setResponses((prev) => [entry, ...prev].slice(0, 15));
+    setLastReply(entry);
+  };
 
   const renderReplyText = (reply) => {
     if (!reply) return "(no reply content)";
@@ -101,18 +184,30 @@ export default function ChatPanel({ className = "" }) {
       if (chatLines) snippets.push(`Recent chat:\n${chatLines}`);
     }
     try {
-      const vector = await callApi("/vector/search", {
+      const recallResponse = await callApi(recallPath, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: queryText || "", top_k: 3 }),
+        body: JSON.stringify({
+          query: queryText || "",
+          top_k: 3,
+          thread_id: threadId,
+          vector_store: useRetrieval ? "both" : "openai",
+        }),
       });
-      const matches = vector?.matches || vector?.results || [];
-      matches.slice(0, 3).forEach((m, idx) => {
-        const txt = typeof m?.text === "string" ? m.text.slice(0, 400) : m?.text;
-        snippets.push(`Vector ${idx + 1}: ${txt || JSON.stringify(m).slice(0, 200)}`);
+      const matches = recallResponse?.matches || [];
+      const summaryMatches = matches.slice(0, 3);
+      setRecallMatches(summaryMatches);
+      summaryMatches.forEach((m, idx) => {
+        const snippet =
+          typeof m?.snippet === "string"
+            ? m.snippet.slice(0, 400)
+            : typeof m?.metadata?.content === "string"
+            ? m.metadata.content.slice(0, 400)
+            : "";
+        snippets.push(`Vector ${idx + 1}: ${snippet || JSON.stringify(m).slice(0, 200)}`);
       });
     } catch {
-      /* ignore */
+      setRecallMatches([]);
     }
     try {
       const docs = await callApi("/documents/profiles?limit=3");
@@ -143,12 +238,40 @@ export default function ChatPanel({ className = "" }) {
           use_openai_summary: true,
           use_openai_translation: false,
           mode,
-          allow_taonga_store: mode === "taonga",
-          source: "ui-chat",
-        }),
-      });
-    } catch {
-      /* best-effort */
+        allow_taonga_store: mode === "taonga",
+        source: "ui-chat",
+      }),
+    });
+  } catch {
+    /* best-effort */
+  }
+};
+
+  const executeFastTool = async (kind, toolPrompt = prompt) => {
+    if (!hasFastLane) return null;
+    try {
+      const fastResult = await runAsyncTool(kind, toolPrompt);
+      if (!fastResult?.text) return null;
+      pushReply(
+        {
+          response: fastResult.text,
+          tool_result: [
+            {
+              tool: kind,
+              output: fastResult.text,
+              status: "fast",
+              metadata: fastResult.metadata,
+            },
+          ],
+          source: "fast_openai",
+        },
+        `${kind}_fast`
+      );
+      logToPipeline(fastResult.text);
+      return fastResult;
+    } catch (err) {
+      setError(err.message || "Fast tool call failed.");
+      return null;
     }
   };
 
@@ -288,18 +411,11 @@ export default function ChatPanel({ className = "" }) {
     }
     setBusy(true);
     try {
+      if (FAST_TOOL_KINDS.has(kind) && hasFastLane) {
+        await executeFastTool(kind);
+        return;
+      }
       let result;
-      const pushReply = (reply, kind) => {
-        const entry = {
-          id: uuidv4(),
-          prompt: prompt || fileName || "[file]",
-          reply,
-          kind,
-          ts: new Date().toISOString(),
-        };
-        setResponses((prev) => [entry, ...prev].slice(0, 15));
-        setLastReply(entry);
-      };
       if (kind === "translate") {
         result = await callApi("/reo/translate", {
           method: "POST",
@@ -337,17 +453,24 @@ export default function ChatPanel({ className = "" }) {
         result = await callApi("/documents/profiles?limit=5");
         pushReply({ response: "Recent docs:\n" + JSON.stringify(result.profiles || [], null, 2), kind }, kind);
       } else if (kind === "recall") {
-        const vector = await callApi("/vector/search", {
+        const recallResponse = await callApi(recallPath, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: prompt, top_k: 5 }),
+          body: JSON.stringify({
+            query: prompt,
+            top_k: 5,
+            thread_id: threadId,
+            vector_store: useRetrieval ? "both" : "openai",
+          }),
         });
+        const recallPayload = recallResponse?.matches || [];
+        setRecallMatches(recallPayload.slice(0, 5));
         const recent = await callApi("/documents/profiles?limit=5");
         pushReply(
           {
             response:
               "Vector recall:\n" +
-              JSON.stringify(vector?.matches || vector?.results || [], null, 2) +
+              JSON.stringify(recallPayload, null, 2) +
               "\n\nRecent docs:\n" +
               JSON.stringify(recent?.profiles || [], null, 2),
           },
@@ -562,81 +685,136 @@ export default function ChatPanel({ className = "" }) {
               {[...responses].reverse().map((entry) => renderEntry(entry))}
             </div>
 
-            <div className="rounded-xl border border-[color:var(--color-border)/.3] bg-[color:var(--color-panel)/.85] backdrop-blur-md shadow-[0_0_16px_var(--color-border)/.15] p-4 space-y-3 shrink-0">
-              <textarea
-                className="min-h-[180px] w-full rounded-xl border border-border bg-panel/60 p-4 text-koru1 text-lg placeholder:text-koru2 focus:outline-none focus:ring-2 focus:ring-koru1"
-                placeholder="Ask, drop a PDF, request summary, translation, or retrieval…"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    onSubmit();
-                  }
-                }}
-                disabled={busy}
-              />
-
-              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-panel/60 p-3">
-                <label className="text-xs text-koru2">
-                  <span className="mr-2 text-koru1 font-semibold">File:</span>
-                  <input
-                    type="file"
-                    className="text-xs text-koru1"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      setFile(f || null);
-                      setFileName(f?.name || "");
-                    }}
-                    disabled={busy}
-                  />
-                </label>
-
-                <div className="flex items-center gap-2 text-sm text-koru1">
-                  <label className="flex items-center gap-1">
-                    <input type="radio" name="mode" checked={mode === "research"} onChange={() => setMode("research")} />
-                    Research
-                  </label>
-                  <label className="flex items-center gap-1">
-                    <input type="radio" name="mode" checked={mode === "taonga"} onChange={() => setMode("taonga")} />
-                    Taonga
-                  </label>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onSubmit}
-                  className="ml-auto px-4 py-1 rounded-full bg-[color:var(--color-panel)] border border-[color:var(--color-border)/.3] hover:bg-[color:var(--color-border)/.2] hover:text-[color:var(--color-glow)] shadow transition-all glow text-sm font-semibold disabled:opacity-60"
+            <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
+              <div className="rounded-xl border border-[color:var(--color-border)/.3] bg-[color:var(--color-panel)/.85] backdrop-blur-md shadow-[0_0_16px_var(--color-border)/.15] p-4 space-y-3 shrink-0">
+                <textarea
+                  className="min-h-[180px] w-full rounded-xl border border-border bg-panel/60 p-4 text-koru1 text-lg placeholder:text-koru2 focus:outline-none focus:ring-2 focus:ring-koru1"
+                  placeholder="Ask, drop a PDF, request summary, translation, or retrieval…"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      onSubmit();
+                    }
+                  }}
                   disabled={busy}
-                >
-                  {busy ? "Sending..." : "Send"}
-                </button>
-                {busy && <Spinner />}
-                {error && <p className="text-sm text-rose-300">{error}</p>}
-              </div>
+                />
 
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: "summarize", label: "Summarize", tone: "bg-primary/20 text-primary" },
-                  { key: "translate", label: "Translate", tone: "bg-panel/60 text-koru1" },
-                  { key: "explain", label: "Explain", tone: "bg-panel/60 text-koru1" },
-                  { key: "pronounce", label: "Pronounce", tone: "bg-panel/60 text-koru1" },
-                  { key: "ocr", label: "OCR (image)", tone: "bg-panel/60 text-koru1" },
-                  { key: "research", label: "Research", tone: "bg-panel/60 text-koru1" },
-                  { key: "web_search", label: "Web Search", tone: "bg-panel/60 text-koru1" },
-                  { key: "sync", label: "Sync (Supabase)", tone: "bg-panel/60 text-koru1" },
-                  { key: "recall", label: "Recall (vectors)", tone: "bg-panel/60 text-koru1" },
-                  { key: "save_chat", label: "Save chat", tone: "bg-panel/60 text-koru1" },
-                ].map((btn) => (
+                <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-panel/60 p-3">
+                  <label className="text-xs text-koru2">
+                    <span className="mr-2 text-koru1 font-semibold">File:</span>
+                    <input
+                      type="file"
+                      className="text-xs text-koru1"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        setFile(f || null);
+                        setFileName(f?.name || "");
+                      }}
+                      disabled={busy}
+                    />
+                  </label>
+
+                  <div className="flex items-center gap-2 text-sm text-koru1">
+                    <label className="flex items-center gap-1">
+                      <input type="radio" name="mode" checked={mode === "research"} onChange={() => setMode("research")} />
+                      Research
+                    </label>
+                    <label className="flex items-center gap-1">
+                      <input type="radio" name="mode" checked={mode === "taonga"} onChange={() => setMode("taonga")} />
+                      Taonga
+                    </label>
+                  </div>
+
                   <button
-                    key={btn.key}
-                    className={`px-4 py-1 rounded-full bg-[color:var(--color-panel)] border border-[color:var(--color-border)/.3] hover:bg-[color:var(--color-border)/.2] hover:text-[color:var(--color-glow)] shadow transition-all text-xs ${btn.tone}`}
-                    onClick={() => runSimpleAction(btn.key)}
+                    type="button"
+                    onClick={onSubmit}
+                    className="ml-auto px-4 py-1 rounded-full bg-[color:var(--color-panel)] border border-[color:var(--color-border)/.3] hover:bg-[color:var(--color-border)/.2] hover:text-[color:var(--color-glow)] shadow transition-all glow text-sm font-semibold disabled:opacity-60"
                     disabled={busy}
                   >
-                    {btn.label}
+                    {busy ? "Sending..." : "Send"}
                   </button>
-                ))}
+                  {busy && <Spinner />}
+                  {error && <p className="text-sm text-rose-300">{error}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="rounded-xl border border-[color:var(--color-border)/.3] bg-[color:var(--color-panel)/.85] backdrop-blur-md shadow-[0_0_16px_var(--color-border)/.15] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-primary">Tool Library</p>
+                    <span className="text-[11px] uppercase tracking-wide text-koru2">Ask Kitenga to run any of these</span>
+                  </div>
+                  <p className="text-[12px] text-koru2">
+                    Type what you need (e.g., “Upload the PDF, then summarize it”) and tap the matching tool so the kaitiaki can perform it, including pipeline runs that store vectors in Supabase.
+                  </p>
+                  <div className="space-y-2">
+                    {TOOL_LIBRARY.map((tool) => (
+                      <button
+                        key={tool.key}
+                        type="button"
+                        className="w-full rounded-xl border border-border/60 bg-panel/60 p-3 text-left shadow-sm transition hover:border-primary/60"
+                        onClick={() => runSimpleAction(tool.key)}
+                        disabled={busy || (tool.requiresFile && !file)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-koru1">{tool.label}</span>
+                          <span className="text-[11px] uppercase tracking-wide text-koru2">{tool.hint}</span>
+                        </div>
+                        <p className="text-[12px] text-koru2 mt-1">{tool.description}</p>
+                        {tool.requiresFile && !file && (
+                          <p className="text-[11px] text-rose-300 mt-1">Attach a file first to run this tool.</p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[color:var(--color-border)/.3] bg-[color:var(--color-panel)/.85] backdrop-blur-md shadow-[0_0_16px_var(--color-border)/.15] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-primary">Vector memory</p>
+                      <p className="text-[11px] text-koru2">Recent recall of chats and tool calls.</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs uppercase tracking-wide text-primary hover:text-primary/80 disabled:text-koru2"
+                      onClick={() => runSimpleAction("recall")}
+                      disabled={busy}
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                  {recallMatches.length > 0 ? (
+                    <div className="space-y-2">
+                      {recallMatches.map((match, idx) => {
+                        const title = match?.metadata?.title || match?.source || `Memory ${idx + 1}`;
+                        const snippet =
+                          match?.text ||
+                          match?.snippet ||
+                          match?.summary ||
+                          (typeof match === "string" ? match : null) ||
+                          "";
+                        const score =
+                          typeof match?.score === "number"
+                            ? match.score.toFixed(3)
+                            : match?.score || (match?.metadata?.score ? match.metadata.score : null);
+                        return (
+                          <div key={`${title}-${idx}`} className="rounded-lg border border-border/40 bg-panel/60 p-3 text-[11px] text-koru2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[12px] font-semibold text-koru1">{title}</span>
+                              {score && <span className="text-[10px] text-koru2">score {score}</span>}
+                            </div>
+                            {snippet && <p className="mt-1 text-[11px] text-koru2 line-clamp-3">{snippet}</p>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-koru2">No recall yet—ask the kaitiaki to fetch memory or run a tool to seed the vectors.</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
