@@ -7,7 +7,6 @@ It reads TE_PO_URL from environment to determine the upstream.
 """
 
 import os
-import json
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -22,6 +21,7 @@ app = FastAPI(
     title=f"Te Pó Proxy - {realm_id}",
     description="Thin proxy to main Te Pó backend"
 )
+LOG_TAG = "[te_po proxy]"
 
 # CORS for realm UI
 app.add_middleware(
@@ -35,8 +35,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    print(f"[te_po_proxy] Started for realm: {realm_id}")
-    print(f"[te_po_proxy] Upstream Te Pó: {te_po_url}")
+    print(f"{LOG_TAG} Started for realm: {realm_id}")
+    print(f"{LOG_TAG} Upstream Te Pó: {te_po_url}")
 
 
 @app.get("/health")
@@ -89,7 +89,7 @@ async def proxy(path: str, request: Request):
                 media_type=response.headers.get("content-type")
             )
     except Exception as e:
-        print(f"[te_po_proxy] Error proxying {request.method} {path}: {str(e)}")
+        print(f"{LOG_TAG} Error proxying {request.method} {path}: {str(e)}")
         raise HTTPException(
             status_code=502, detail=f"Upstream error: {str(e)}")
 

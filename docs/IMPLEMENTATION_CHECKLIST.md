@@ -87,7 +87,7 @@ Use this checklist to track progress as you implement the blueprint.
   - [ ] Go to Supabase dashboard → SQL Editor
   - [ ] Run: `CREATE EXTENSION IF NOT EXISTS vector;`
   - [ ] Verify: Extension enabled
-- [ ] Run migration: `migrations/001_realm_tables.sql`
+- [x] Run migration: `migrations/001_realm_tables.sql` *(SQL already executed against Supabase; double-check the tables/indexes exist in the dashboard)*
   - [ ] Create research_sessions table
   - [ ] Create research_notes table
   - [ ] Create research_chunks table (optional)

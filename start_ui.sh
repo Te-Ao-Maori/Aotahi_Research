@@ -29,7 +29,7 @@ kill_port "$FRONTEND_PORT"
 
 start_proxy() {
   echo "Starting proxy on port ${PROXY_PORT}..."
-  (set -a; source "$ROOT/.env"; set +a; PROXY_PORT="$PROXY_PORT" python "$ROOT/te_po_proxy/main.py") &
+  (set -a; source "$ROOT/.env"; set +a; PROXY_PORT="$PROXY_PORT" python "$ROOT/te_po/proxy/main.py") &
   PROXY_PID=$!
   sleep 1
 }

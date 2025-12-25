@@ -32,8 +32,8 @@ start_backend() {
 
 start_proxy() {
   if [[ -f "$ROOT/.env" ]]; then
-    echo "Starting proxy (te_po_proxy/main.py) on port 8100..."
-    (set -a; source "$ROOT/.env"; set +a; PROXY_PORT=8100 python te_po_proxy/main.py) &
+    echo "Starting proxy (te_po/proxy/main.py) on port 8100..."
+    (set -a; source "$ROOT/.env"; set +a; PROXY_PORT=8100 python te_po/proxy/main.py) &
     PROXY_PID=$!
   else
     echo ".env file missing at ${ROOT}; cannot start proxy."

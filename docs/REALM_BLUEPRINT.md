@@ -369,7 +369,7 @@ OPENAI_VECTOR_STORE_ID_RESEARCHER=vs_xxxxx
 - [ ] Chat pipeline calls recall gateway, not scattered `/vector/search`
 - [ ] Translation logs saved to `translations` + `translation_logs` tables
 - [ ] Pronunciation cache stored in dedicated table with realm_id
-- [ ] Proxy (`te_po_proxy`) passes `REALM_ID` to backend
+- [ ] Proxy (`te_po/proxy`) passes `REALM_ID` to backend
 - [ ] Frontend never hardcodes realm ID (uses config)
 - [ ] No cross-realm data leaks in Supabase queries (always filter by realm_id)
 

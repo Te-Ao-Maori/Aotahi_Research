@@ -42,7 +42,7 @@ sleep 2  # Give backend time to start
 echo ""
 echo "🚀 Starting proxy on :8100..."
 cd "${ROOT_DIR}"
-(set -a; source "${ROOT_DIR}/.env"; set +a; PROXY_PORT=8100 python3 te_po_proxy/main.py) &
+(set -a; source "${ROOT_DIR}/.env"; set +a; PROXY_PORT=8100 python3 te_po/proxy/main.py) &
 PROXY_PID=$!
 echo "   PID: ${PROXY_PID}"
 sleep 1  # Give proxy time to start

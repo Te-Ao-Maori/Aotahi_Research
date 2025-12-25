@@ -13,8 +13,8 @@ A dedicated realm for Māori cultural research, linguistics, and knowledge explo
 ### Manual Setup
 
 ```bash
-# Install dependencies
-pip install -r te_po_proxy/requirements.txt
+# Install Python dependencies
+pip install -r te_po/backend/requirements.txt -r te_po/proxy/requirements.txt
 cd te_ao && npm install && cd ..
 
 # Update environment
@@ -36,14 +36,18 @@ npm run dev
 
 **Terminal 2 - Backend Proxy:**
 ```bash
-python te_po_proxy/main.py
+python te_po/proxy/main.py
 ```
 
 ## Structure
 
 - **mauri/**: State and configuration
   - `realm_manifest.json`: Realm identity and configuration
-- **te_po_proxy/**: Backend proxy (forwards to main Te Pó)
+- **te_po/backend/**: Recall-focused FastAPI service
+  - `main.py`: FastAPI app with recall router
+  - `routes/recall.py`: `/recall` gateway logic
+  - `db/`, `schema/`, `utils/`: helpers for Supabase, configs, embeddings
+- **te_po/proxy/**: Realm-specific backend proxy (forwards to main Te Pó)
   - `main.py`: FastAPI proxy server
   - `bootstrap.py`: Initialization script
   - `requirements.txt`: Python dependencies
@@ -69,6 +73,6 @@ Authentication uses the `BEARER_KEY` from `.env`, automatically added to all req
 
 ## Next Steps
 
-- Deploy `te_po_proxy` to a hosting platform (Render, Railway, etc.)
+- Deploy `te_po/proxy` to a hosting platform (Render, Railway, etc.)
 - (Optional) Add a realm-specific UI under `te_ao/`
 - Configure domain name and SSL

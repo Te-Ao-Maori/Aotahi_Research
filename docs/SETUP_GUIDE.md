@@ -41,13 +41,13 @@ BEARER_KEY=your-api-token-here
 
 ```bash
 # Terminal 2 - Stop the old proxy (Ctrl+C) and restart:
-python te_po_proxy/main.py
+python te_po/proxy/main.py
 ```
 
 You should see:
 ```
-[te_po_proxy] Started for realm: maori_research
-[te_po_proxy] Upstream Te Pó: http://localhost:5000
+[te_po proxy] Started for realm: maori_research
+[te_po proxy] Upstream Te Pó: http://localhost:5000
 ```
 
 ### Step 3: Test the Connection
@@ -63,9 +63,9 @@ You should see:
 
 2. **Trigger any button in the UI** (Summarize, Translate, Explain, etc.) and watch:
    - **Frontend Console** (F12) - Check for fetch errors
-   - **Proxy Terminal** - You'll see log lines like:
+  - **Proxy Terminal** - You'll see log lines like:
      ```
-     [te_po_proxy] Error proxying POST /reo/translate: Connection refused
+     [te_po proxy] Error proxying POST /reo/translate: Connection refused
      ```
      This tells you whether the proxy reached the backend
 

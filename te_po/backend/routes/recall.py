@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from backend.schema.realms import RealmConfigLoader
-from backend.utils.recall_service import RecallService
+from ..schema.realms import RealmConfigLoader
+from ..utils.recall_service import RecallService
 
 router = APIRouter(tags=["recall"])
 

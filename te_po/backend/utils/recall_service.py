@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 import httpx
 
-from backend.db.supabase import SupabaseClient
+from ..db.supabase import SupabaseClient
 
 
 class RecallService:

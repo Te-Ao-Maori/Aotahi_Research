@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routes.recall import router as recall_router
+from .routes.recall import router as recall_router
 
 app = FastAPI(title="Aotahi Research Recall Service")
 

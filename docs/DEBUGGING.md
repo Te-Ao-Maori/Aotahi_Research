@@ -38,8 +38,8 @@ Error: Failed to connect to http://localhost:8000
 Fix:
 ```bash
 # Terminal 2
-python te_po_proxy/main.py
-# Should print: [te_po_proxy] Started for realm: maori_research
+python te_po/proxy/main.py
+# Should print: [te_po proxy] Started for realm: maori_research
 ```
 
 **B) Wrong TE_PO_URL in .env**
@@ -111,7 +111,7 @@ curl -v -X POST http://localhost:8000/reo/translate \
 BEARER_KEY=your-actual-token-not-test-token
 
 # Restart proxy
-python te_po_proxy/main.py
+python te_po/proxy/main.py
 ```
 
 ---
@@ -141,13 +141,13 @@ curl -X POST http://localhost:8000/reo/translate \
 
 ## Deep Debug: Enable Proxy Logging
 
-Edit [te_po_proxy/main.py](te_po_proxy/main.py) and add logging:
+Edit [te_po/proxy/main.py](te_po/proxy/main.py) and add logging:
 
 ```python
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("te_po_proxy")
+logger = logging.getLogger("te_po proxy")
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy(path: str, request: Request):
@@ -203,19 +203,19 @@ curl -X POST http://localhost:8000/status/full \
 
 ### Good: Proxy forwarding successfully
 ```
-[te_po_proxy] Started for realm: maori_research
-[te_po_proxy] Upstream Te Pó: http://localhost:5000
+[te_po proxy] Started for realm: maori_research
+[te_po proxy] Upstream Te Pó: http://localhost:5000
 ```
 
 ### Bad: Can't reach backend
 ```
-[te_po_proxy] Error proxying POST /reo/translate: Connection refused
+[te_po proxy] Error proxying POST /reo/translate: Connection refused
 ```
 → Backend is not running or wrong URL
 
 ### Bad: Timeout
 ```
-[te_po_proxy] Error proxying POST /kitenga/gpt-whisper: Read timed out
+[te_po proxy] Error proxying POST /kitenga/gpt-whisper: Read timed out
 ```
 → Backend is running but too slow
 
@@ -228,7 +228,7 @@ For the buttons to work, you need:
 | Component | Port | Status |
 |-----------|------|--------|
 | Frontend (React Vite) | 5173 | ✓ Running (`npm run dev`) |
-| Proxy (FastAPI) | 8000 | ✓ Running (`python te_po_proxy/main.py`) |
+| Proxy (FastAPI) | 8000 | ✓ Running (`python te_po/proxy/main.py`) |
 | Main Te Pó Backend | 5000 | ✓ Running (check YOUR backend docs) |
 | .env `TE_PO_URL` | - | ✓ Points to correct backend |
 | .env `BEARER_KEY` | - | ✓ Matches backend's expected token |

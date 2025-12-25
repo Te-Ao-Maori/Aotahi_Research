@@ -24,7 +24,7 @@ You are reviewing the Aotahi Research Portal codebase for implementation of real
 The repo is at `/workspaces/Aotahi_Research/` with:
 
 - **Frontend:** `te_ao/` (React + Vite, runs on port 5000)
-- **Proxy:** `te_po_proxy/` (FastAPI, forwards all requests to backend on port 8100)
+- **Proxy:** `te_po/proxy/` (FastAPI, forwards all requests to backend on port 8100)
 - **Backend:** External service on port 8000 (Render or local)
 - **Realm Config:** `mauri/realm_manifest.json` (currently minimal, no per-realm settings)
 - **Database:** Supabase (currently used for documents, memory, etc.)
@@ -165,7 +165,7 @@ Provide a **numbered list of files to change**, followed by **exact code diffs**
 - Change styling or UI components
 - Move or rename existing endpoints
 - Rewrite `ChatPanel.jsx` wholesale; minimal changes only
-- Change proxy (`te_po_proxy/main.py`) logic
+- Change proxy (`te_po/proxy/main.py`) logic
 
 ---
 

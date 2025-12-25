@@ -20,7 +20,7 @@
                            │ Body: {"text": "Kia ora"}
                            │ Header: Authorization: Bearer <token>
                            ▼
-┌─ te_po_proxy (FastAPI) ─────────────────────────────────────┐
+┌─ te_po proxy (FastAPI) ─────────────────────────────────────┐
 │                                                              │
 │  Receives POST /reo/translate                               │
 │                                                              │
@@ -52,7 +52,7 @@
                            │ HTTP 200 OK
                            │ Body: {"output": "Hello"}
                            ▼
-┌─ te_po_proxy ───────────────────────────────────────────────┐
+┌─ te_po proxy ───────────────────────────────────────────────┐
 │                                                              │
 │  Response handler:                                          │
 │    1. Gets response from backend                            │
@@ -123,7 +123,18 @@ Backend (.env or config):
 ## Network Ports
 
 - **5173**: Frontend React dev server (npm run dev)
-- **8000**: te_po_proxy (FastAPI proxy server)
+- **8000**: te_po proxy (FastAPI proxy server)
 - **5000**: Your main Te Pó backend (should be running separately)
 
 All three should be running for full functionality.
+
+## Deployment & Hosting Strategy
+
+- **Render-hosted frontend/proxy**: The goal is to keep this repo lightweight—`te_ao/` and its proxy (`te_po/proxy`) act as a standalone UI surface that routes all heavy work back to the AwaNet/Te Pó stack on Render (via `TE_PO_URL`). This keeps deployment simple while letting Render handle the GPT, Supabase, and recall services.
+- **Render for backend calls**: Any request that needs the main Te Pó capabilities (chat pipelines, translations, Supabase access) should pass through the proxy to the Render service rather than duplicating logic here. That makes it safe to serve te_ao as a static app while staying in sync with the existing backend.
+- **Cloudflare / git automation**: When you’re ready to publish, a `git push` (or CI pipeline) can build the frontend assets, run the proxy/backend tests, and publish to Cloudflare Pages or Workers. Confirm everything passes locally (proxy on 8100, backend on 8000, frontend on 5000) before shipping the Cloudflare deploy to keep rollouts predictable.
+
+## GPT Tool Manifest
+
+- **Expose `.well-known/kitenga.json`** (or similar) from the proxy/backend so GPT builders can auto-discover your tool schema. Document the manifest URL in your GPT toolkit setup and make sure `api_spec_url` and `api_url` point at the Render deployment. That way Kitenga Whiro on the GPT platform can call the same endpoints the frontend uses.
+- **Keep the GPT surface minimal**: Only expose the endpoints GPT needs (e.g., `/reo/translate`, `/kitenga/gpt-whisper`, `/research/stacked`) and rely on Render for auth/supabase/assistant state. This mirrors how the frontend already interacts with the proxy.

@@ -1,6 +1,11 @@
 [
   {
-    "file": "te_po_proxy/main.py",
+    "file": "te_po/backend/main.py",
+    "method": "GET",
+    "path": "/health"
+  },
+  {
+    "file": "te_po/proxy/main.py",
     "method": "GET",
     "path": "/health"
   }

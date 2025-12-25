@@ -144,7 +144,7 @@ cd te_ao && npm run dev
 
 **Terminal 2 - Proxy:**
 ```bash
-set -a && source .env && set +a && PROXY_PORT=8100 python3 te_po_proxy/main.py
+set -a && source .env && set +a && PROXY_PORT=8100 python3 te_po/proxy/main.py
 # Runs on http://localhost:8100
 ```
 
@@ -175,8 +175,8 @@ set -a && source .env && set +a && PROXY_PORT=8100 python3 te_po_proxy/main.py
 4. **Monitor Proxy Logs:**
    Watch the proxy terminal output for messages like:
    ```
-   [te_po_proxy] Started for realm: maori_research
-   [te_po_proxy] Upstream Te Pó: http://localhost:8000
+   [te_po proxy] Started for realm: maori_research
+   [te_po proxy] Upstream Te Pó: http://localhost:8000
    INFO: Uvicorn running on http://0.0.0.0:8100
    ```
 
@@ -213,11 +213,18 @@ Aotahi_Research/
 │   │   ├── components/           # Reusable UI components
 │   │   └── hooks/                # Custom React hooks (useApi, etc.)
 │   └── public/                   # Static assets
-├── te_po_proxy/                  # FastAPI proxy service
-│   ├── main.py                   # Proxy server implementation
-│   ├── bootstrap.py
-│   ├── requirements.txt
-│   └── Dockerfile
+├── te_po                        # Realm-specific runtime helpers
+│   ├── backend/                  # FastAPI recall service
+│   │   ├── main.py               # Recall FastAPI app
+│   │   ├── routes/recall.py      # `/recall` gateway + models
+│   │   ├── db/                   # Supabase helpers
+│   │   ├── schema/realms.py      # Realm loader
+│   │   └── utils/recall_service.py
+│   └── proxy/                    # FastAPI proxy service
+│       ├── main.py               # Proxy server implementation
+│       ├── bootstrap.py
+│       ├── requirements.txt
+│       └── Dockerfile
 ├── mauri/                        # Realm configuration
 │   └── realm_manifest.json
 └── Documentation files
