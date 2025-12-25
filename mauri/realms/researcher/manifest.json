@@ -1,18 +1,16 @@
 {
   "realm_id": "researcher",
   "display_name": "Māori Research Realm",
-  "description": "Realm for academic research with OpenAI Assistant + Vector Store",
-  "te_po_url": "http://localhost:5000",
+  "description": "Realm for academic research with OpenAI Assistant + vector store access.",
+  "te_po_url": "https://tiwhanawhana-backend.onrender.com",
   "auth_mode": "bearer",
   "openai": {
     "assistant_id": "asst_vZC11BFrQcaVjZxMp0VtT7lV",
-    "vector_store_id": "vs_692ee26573688191817773029871850d",
-    "model": "gpt-4",
-    "instructions": "You are a helpful Māori research assistant. Provide accurate, culturally sensitive information about Māori history, culture, and language."
+    "vector_store_id": "vs_692ee26573688191817773029871850d"
   },
   "supabase": {
-    "project_url": "https://xxxx.supabase.co",
-    "anon_key": "eyJ...REPLACE_ME",
+    "project_url": "https://ruqejtkudezadrqbdodx.supabase.co",
+    "anon_key": "sb_publishable_EgW7HkbcKDd0GccIXflXaw_g8KTjE1c",
     "tables": {
       "sessions": "research_sessions",
       "notes": "research_notes",
@@ -22,9 +20,9 @@
     }
   },
   "features": {
+    "recall": true,
     "vector_search": true,
     "pipeline": true,
-    "recall": true,
     "memory": true,
     "kaitiaki": false
   },
@@ -32,7 +30,5 @@
     "vector_store": "both",
     "top_k": 5,
     "use_supabase_pgvector": true
-  },
-  "created_at": "2025-12-16T00:00:00Z",
-  "version": "1.0.0"
+  }
 }

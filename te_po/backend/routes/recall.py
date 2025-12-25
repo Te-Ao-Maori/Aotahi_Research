@@ -37,4 +37,18 @@ async def recall(realm_id: str, request: RecallRequest):
         "top_k": request.top_k,
         "vector_store": request.vector_store,
     }
-    return RecallResponse(**await service.run(payload))
+    try:
+        return RecallResponse(**await service.run(payload))
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover
+        raise HTTPException(status_code=500, detail=f"Recall failed: {exc}")
+
+
+@router.get("/{realm_id}/manifest")
+def manifest(realm_id: str):
+    try:
+        config = RealmConfigLoader.load(realm_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Realm '{realm_id}' not found")
+    return config.dict()

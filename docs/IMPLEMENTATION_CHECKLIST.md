@@ -1,5 +1,7 @@
 # Implementation Checklist: Realm-Scoped Isolation
 
+> **Security reminder:** never commit `.env` or real credentials. Keep `.env` local, update `.env.example`, and copy it when provisioning a new environment.
+
 Use this checklist to track progress as you implement the blueprint.
 
 ---
@@ -98,6 +100,17 @@ Use this checklist to track progress as you implement the blueprint.
   - [ ] Verify: All tables exist in Supabase
   - [ ] Verify: All have realm_id column
   - [ ] Verify: Indexes created
+
+#### Phase 4 Automation
+
+Run the verification script to confirm pgvector and the migrated tables/indexes are healthy:
+
+```bash
+chmod +x scripts/db_verify_phase4.sh
+./scripts/db_verify_phase4.sh .env
+```
+
+The script reads `DATABASE_URL` (or `SUPABASE_DB_URL`), runs `scripts/sql/phase4_verify.sql`, and shows the pgvector, tables, and indexes you just created. Fix any errors before moving on to Phase 5.
 - [ ] Create Supabase pgvector search function (if using):
   - [ ] Create `match_research_embeddings()` function
   - [ ] Test: Run sample query
@@ -109,26 +122,50 @@ Use this checklist to track progress as you implement the blueprint.
 
 ## Phase 5: Realm Configuration 📋
 
-- [ ] Fill in `mauri/realms/researcher/manifest.json`:
-  - [ ] realm_id = "researcher"
-  - [ ] openai.assistant_id = asst_researcher_xxxxx
-  - [ ] openai.vector_store_id = vs_researcher_xxxxx
-  - [ ] supabase.project_url = https://xxxx.supabase.co
-  - [ ] supabase.anon_key = eyJ...
-  - [ ] features.recall = true
-  - [ ] Test: RealmConfigLoader can load it
-- [ ] Fill in `mauri/realms/translator/manifest.json`:
-  - [ ] realm_id = "translator"
-  - [ ] openai.assistant_id = asst_translator_yyyyy
-  - [ ] openai.vector_store_id = vs_translator_yyyyy
-  - [ ] supabase.project_url = https://xxxx.supabase.co
-  - [ ] supabase.anon_key = eyJ...
-  - [ ] features.recall = false (translations don't use recall)
-  - [ ] Test: RealmConfigLoader can load it
+- [x] Fill in `mauri/realms/researcher/manifest.json`:
+  - [x] realm_id = "researcher"
+  - [x] openai.assistant_id = asst_researcher_xxxxx
+  - [x] openai.vector_store_id = vs_researcher_xxxxx
+  - [x] supabase.project_url = https://xxxx.supabase.co
+  - [x] supabase.anon_key = eyJ...
+  - [x] features.recall = true
+  - [x] Test: RealmConfigLoader can load it
+- [x] Fill in `mauri/realms/translator/manifest.json`:
+  - [x] realm_id = "translator"
+  - [x] openai.assistant_id = asst_translator_yyyyy
+  - [x] openai.vector_store_id = vs_translator_yyyyy
+  - [x] supabase.project_url = https://xxxx.supabase.co
+  - [x] supabase.anon_key = eyJ...
+  - [x] features.recall = false (translations don't use recall)
+  - [x] Test: RealmConfigLoader can load it
 
 ---
 
+### Phase 5 automation
+
+Generate both manifests from `.env` so your values stay centralized:
+
+```bash
+chmod +x scripts/generate_realm_manifests.py
+export $(grep -v '^\s*#' .env | xargs -d '\n')
+python3 scripts/generate_realm_manifests.py
+```
+
+> 💡 If you later rotate `OPENAI_ASSISTANT_ID_TRANSLATOR` (or any OpenAI/Supabase key), rerun `scripts/generate_realm_manifests.py` so the manifests update automatically.
+
+This reads the `OPENAI_*` and `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` values you just added and rewrites the JSON files. Re-run whenever the IDs change.
+
 ## Phase 6: Local Testing 🧪
+
+Automate these smoke checks with `scripts/api_smoke_phase6.sh`:
+
+```bash
+chmod +x scripts/api_smoke_phase6.sh
+./scripts/api_smoke_phase6.sh .env
+```
+
+It covers `/health`, both manifests, the researcher recall (expect 200 with matches/query_tokens/recall_latency_ms), and the translator recall (expect 403) before optional Supabase REST insert/query tests in the same command.
+> Supabase checks only run if both `SUPABASE_URL` and `SUPABASE_KEY` (or `SUPABASE_SERVICE_ROLE_KEY`) are set in `.env`.
 
 ### Backend Connectivity
 - [ ] Backend starts: `python -m uvicorn main:app --reload`

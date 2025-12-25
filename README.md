@@ -21,6 +21,7 @@ cd te_ao && npm install && cd ..
 cp .env.example .env
 # Edit .env and set TE_PO_URL, BEARER_KEY, VITE_API_URL, VITE_PIPELINE_TOKEN, and VITE_OPENAI_KEY
 ```
+> ⚠️ Keep `.env` local and **never commit it**; treat `.env.example` as the shared template.
 
 ## Documentation
 

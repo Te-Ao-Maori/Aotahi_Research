@@ -1,38 +1,31 @@
 {
   "realm_id": "translator",
   "display_name": "Te Reo Translation Realm",
-  "description": "Realm for Te Reo ↔ English translation and pronunciation",
-  "te_po_url": "http://localhost:5000",
+  "description": "Realm for Te Reo ↔ English translation, explanation, and pronunciation helpers.",
+  "te_po_url": "https://tiwhanawhana-backend.onrender.com",
   "auth_mode": "bearer",
   "openai": {
     "assistant_id": "asst_translator_placeholder",
-    "vector_store_id": "vs_translator_placeholder",
-    "model": "gpt-4",
-    "instructions": "You are an expert Te Reo Māori translator. Provide accurate, culturally-appropriate translations and pronunciation guidance. Include dialect information when relevant."
+    "vector_store_id": "vs_translator_placeholder"
   },
   "supabase": {
-    "project_url": "https://xxxx.supabase.co",
-    "anon_key": "eyJ...REPLACE_ME",
+    "project_url": "https://ruqejtkudezadrqbdodx.supabase.co",
+    "anon_key": "sb_publishable_EgW7HkbcKDd0GccIXflXaw_g8KTjE1c",
     "tables": {
+      "sessions": "research_sessions",
+      "notes": "research_notes",
+      "chunks": "research_chunks",
+      "embeddings": "research_embeddings",
       "recall_logs": "recall_logs"
     }
   },
   "features": {
+    "recall": false,
     "vector_search": true,
     "pipeline": true,
-    "recall": false,
     "memory": false,
     "kaitiaki": false
   },
-  "translation_config": {
-    "source_lang": "en",
-    "target_lang": "mi",
-    "dialect_aware": true,
-    "pronunciation_cache": true,
-    "confidence_threshold": 0.75
-  },
-  "created_at": "2025-12-16T00:00:00Z",
-  "version": "1.0.0",
   "recall_config": {
     "vector_store": "both",
     "top_k": 5,
